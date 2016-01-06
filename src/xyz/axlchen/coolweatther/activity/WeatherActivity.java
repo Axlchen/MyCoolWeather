@@ -1,6 +1,7 @@
 package xyz.axlchen.coolweatther.activity;
 
 import xyz.axlchen.coolweatther.R;
+import xyz.axlchen.coolweatther.service.AutoUpdateService;
 import xyz.axlchen.coolweatther.util.HttpCallbackListener;
 import xyz.axlchen.coolweatther.util.HttpUtil;
 import xyz.axlchen.coolweatther.util.Utility;
@@ -38,6 +39,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.weather_layout);
+		
 		//初始化各种控件
 		weatherInfoLayout = (LinearLayout)findViewById(R.id.weather_info_layout);
 		cityNameText = (TextView)findViewById(R.id.city_name);
@@ -48,6 +50,8 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		currentDateText = (TextView)findViewById(R.id.current_date);
 		switchCity = (Button)findViewById(R.id.switch_city);
 		refreshWeather = (Button)findViewById(R.id.refresh_weather);
+		switchCity.setOnClickListener(this);
+		refreshWeather.setOnClickListener(this);
 		
 		String countyCode = getIntent().getStringExtra("county_code");
 		if (!TextUtils.isEmpty(countyCode)) {
@@ -60,8 +64,6 @@ public class WeatherActivity extends Activity implements OnClickListener{
 			//没有县级代号就直接显示本地天气
 			showWeather();
 		}
-		switchCity.setOnClickListener(this);
-		refreshWeather.setOnClickListener(this);
 	}
 	
 	@Override
@@ -151,11 +153,14 @@ public class WeatherActivity extends Activity implements OnClickListener{
 	private void showWeather() {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		cityNameText.setText(prefs.getString("city_name", ""));
-		temp1Text.setText(prefs.getString("temp2", ""));
-		temp2Text.setText(prefs.getString("temp1", ""));
+		temp1Text.setText(prefs.getString("temp1", ""));
+		temp2Text.setText(prefs.getString("temp2", ""));
 		weatherDespText.setText(prefs.getString("weather_desp", ""));
 		publishText.setText("今天" + prefs.getString("publish_time", "") + "发布");
 		currentDateText.setText(prefs.getString("current_date", ""));
 		weatherInfoLayout.setVisibility(View.VISIBLE);
+		cityNameText.setVisibility(View.VISIBLE);
+		Intent intent = new Intent(this, AutoUpdateService.class);
+		startService(intent);
 	}
 }
